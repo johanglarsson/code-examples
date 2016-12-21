@@ -4,7 +4,7 @@
   "description": "Demo project for viaplay REST",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start" : "node app.js"
   },
   "keywords": [
     "VIAPLAY"
@@ -12,8 +12,9 @@
   "author": "Johan Larsson",
   "license": "ISC",
   "dependencies": {
-    "async": "^2.1.4",
-    "express": "^4.14.0",
-    "request": "^2.79.0"
+    "async": "2.1.4",
+    "body-parser": "1.15.2",
+    "express": "4.14.0",
+    "request": "2.79.0"
   }
 }

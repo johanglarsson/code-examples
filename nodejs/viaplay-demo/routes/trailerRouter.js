@@ -2,16 +2,12 @@
 
 // Used modules.
 var express = require('express');
-var app = express();
+var router = express.Router();
 var async = require('async');
 var request=require('request');
 
-
-// Set GET router
-var trailer = express.Router();
-trailer.get('/', findTrailer, function(req, res) { });
-app.use('/trailer', trailer);
-module.exports = app;
+router.get('/', findTrailer, function(req, res) { });
+module.exports = router;
 
 const imdAPIKey = '8c5e88c814cb15cf1c1e732f09c8bf60';
 const serviceTimeout = 5000;
