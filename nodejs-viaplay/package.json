@@ -1,0 +1,19 @@
+{
+  "name": "viaplay-rest",
+  "version": "1.0.0",
+  "description": "Demo project for viaplay REST",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "VIAPLAY"
+  ],
+  "author": "Johan Larsson",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.1.4",
+    "express": "^4.14.0",
+    "request": "^2.79.0"
+  }
+}
