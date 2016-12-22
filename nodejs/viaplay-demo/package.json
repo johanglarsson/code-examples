@@ -4,7 +4,8 @@
   "description": "Demo project for viaplay REST",
   "main": "server.js",
   "scripts": {
-    "start" : "node app.js"
+    "start": "node app.js",
+    "test" : "mocha test --timeout 20000"
   },
   "keywords": [
     "VIAPLAY"
@@ -12,9 +13,13 @@
   "author": "Johan Larsson",
   "license": "ISC",
   "dependencies": {
-    "async": "2.1.4",
     "body-parser": "1.15.2",
     "express": "4.14.0",
     "request": "2.79.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-http": "^3.0.0",
+    "mocha": "^3.2.0"
   }
 }

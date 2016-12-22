@@ -19,7 +19,8 @@ var server = app.listen(app.get('port'), function() {
 });
 
 
-// Set GET router
+// Set all microservice endpoints:
 var trailerRouter = require('./routes/trailerRouter')
 app.use('/trailer', trailerRouter);
 
+module.exports = app
