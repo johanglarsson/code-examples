@@ -13,16 +13,17 @@ const serviceTimeout = 10000;
 // Find trailer operation
 function findTrailer(req, res, next) {
   
+  res.set({'content-type': 'text/plain'});
+
   validateRequest(req.query.resource)
   	.then(getViaplayContent)
   	.then(getImdbTrailerURL)
   	.then(function(data){
-  		res.set({'content-type': 'text/plain'})
+  		
   		return res.send(data);
   	})
   	.catch(function(err){
-  		console.log(err);
-		return res.status(err.code).json(err.message);
+		return res.status(err.code).send(err.error);
   	})
 
 }
@@ -34,9 +35,9 @@ function validateRequest(resourceURL) {
 
 	  if (resourceURL) {
 			//check the url format
-			return fullfill(resourceURL );
+			return fullfill( resourceURL );
 		} else {
-			return reject({code:404, message:'Missing resource URL'});
+			return reject(createError(404,'Missing resource query parameter'));
 		}
 	})
 	
@@ -49,19 +50,18 @@ function getViaplayContent(resourceURL) {
 
 		request.get(resourceURL,{ timeout: serviceTimeout },function(err,res,body){
 		
-			if(err) return reject({code:500, message:err});
-			if (res.statusCode === 404 ) return reject({code:res.statusCode, error:{code:1,message:'Movie ' + resourceURL + ' not found in Viaplay'}});
-	  		if(res.statusCode !== 200 ) return reject({code:res.statusCode, error:{code:999,message:res.body}});
+			if(err) return reject(crateError(500, err));
+			if (res.statusCode === 404 ) return reject(createError(res.statusCode, 'Movie ' + resourceURL + ' not found in Viaplay'));
+	  		if(res.statusCode !== 200 ) return reject(crateError(res.statusCode, res.body));
 
 	  		let response = JSON.parse(res.body);
 	  		
 	  		return fullfill(response._embedded['viaplay:blocks'][0]._embedded['viaplay:product'].content.imdb.id); 
 
 		});	
+	});
+};
 
-	})
-	
-}
 // get IMDB trailer URL based on a movie id.
 function getImdbTrailerURL(movieID ) {
 	
@@ -69,12 +69,17 @@ function getImdbTrailerURL(movieID ) {
 
 		request.get('https://api.themoviedb.org/3/movie/' + movieID + '/videos?api_key=' + imdAPIKey + '&language=en-US',{ timeout: serviceTimeout },function(err,res,body){
 			
-			if(err) return reject({code:500, message:err});
-			if (res.statusCode === 404 ) return reject({code:res.statusCode, error:{code:2,message:'Movie ' + movieID + ' not found in IMDB'}});
-	  		if(res.statusCode !== 200 ) return reject({code:res.statusCode, error:{code:999,message:res.body}});
+			if(err) return reject(crateError(500, err));
+			if (res.statusCode === 404 ) return reject(createError(res.statusCode, 'Movie trailer ' + movieID + ' not found in IMDB'));
+	  		if(res.statusCode !== 200 ) return reject(crateError(res.statusCode, res.body));
 	  		let response = JSON.parse(res.body);
 	  		return fullfill('http://www.youtube.com/watch?v=' + response.results[0].key); 
 
 		});
 	});
-}
+};
+
+
+function createError(httpCode, message) {
+	return {code:httpCode, error: message};
+};

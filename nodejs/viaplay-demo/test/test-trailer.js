@@ -25,14 +25,28 @@ describe('Trailer API', () => {
         done();  
       })
   });
-    it('GET trailer should not found when the URL is invalid', (done) => {
+  it('GET trailer should not found when the URL is invalid', (done) => {
     chai.request(server)
       .get('/trailer?resource=https://content.viaplay.se/pc-se/film/ted-2-2015NOTFOUND')
       .end(function(err, res) {
         expect(res).to.have.status(404);
-        expect(res).to.be.json;
+        expect(res).to.have.header('content-type', 'text/plain; charset=utf-8');
+        expect(res).to.be.text;
         done();  
       })
   });
+
+  it('GET trailer should not found when the URL resource query parameter is missing', (done) => {
+    chai.request(server)
+      .get('/trailer')
+      .end(function(err, res) {
+        expect(res).to.have.status(404);
+        expect(res).to.have.header('content-type', 'text/plain; charset=utf-8');
+        expect(res).to.be.text;
+        assert.equal(res.text,'Missing resource query parameter','Returned message is not correct');
+        done();  
+      })
+  });
+
 
 });
