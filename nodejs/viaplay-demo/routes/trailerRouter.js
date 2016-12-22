@@ -8,7 +8,7 @@ router.get('/', findTrailer, function(req, res) { });
 module.exports = router;
 
 const imdAPIKey = '8c5e88c814cb15cf1c1e732f09c8bf60';
-const serviceTimeout = 5000;
+const serviceTimeout = 10000;
 
 // Find trailer operation
 function findTrailer(req, res, next) {
@@ -21,7 +21,8 @@ function findTrailer(req, res, next) {
   		return res.send(data);
   	})
   	.catch(function(err){
-		return res.status(err.code).json(err.error);
+  		console.log(err);
+		return res.status(err.code).json(err.message);
   	})
 
 }
@@ -48,7 +49,7 @@ function getViaplayContent(resourceURL) {
 
 		request.get(resourceURL,{ timeout: serviceTimeout },function(err,res,body){
 		
-			if(err) return next({code:500, message:err});
+			if(err) return reject({code:500, message:err});
 			if (res.statusCode === 404 ) return reject({code:res.statusCode, error:{code:1,message:'Movie ' + resourceURL + ' not found in Viaplay'}});
 	  		if(res.statusCode !== 200 ) return reject({code:res.statusCode, error:{code:999,message:res.body}});
 
@@ -68,7 +69,7 @@ function getImdbTrailerURL(movieID ) {
 
 		request.get('https://api.themoviedb.org/3/movie/' + movieID + '/videos?api_key=' + imdAPIKey + '&language=en-US',{ timeout: serviceTimeout },function(err,res,body){
 			
-			if(err) return next({code:500, message:err});
+			if(err) return reject({code:500, message:err});
 			if (res.statusCode === 404 ) return reject({code:res.statusCode, error:{code:2,message:'Movie ' + movieID + ' not found in IMDB'}});
 	  		if(res.statusCode !== 200 ) return reject({code:res.statusCode, error:{code:999,message:res.body}});
 	  		let response = JSON.parse(res.body);
