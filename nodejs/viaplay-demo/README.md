@@ -10,7 +10,7 @@ The structure is as follows:
 ## Usage notes
 
 ### Docker
-There is a docker config that can be built and run. Follow these steps:
+There is a simple docker config that can be built and run. Follow these steps:
 
 1. docker build -t ninja/viaplay-demo-app .
 2. docker run -p 49160:8080 -d ninja/viaplay-demo-app
@@ -22,8 +22,9 @@ curl -i http://localhost:49160/trailer\?resource\=https://content.viaplay.se/pc-
 You will receive the URL for the trailer back.
 
 ### Locally
+Install the package using **npm install**...
 
-Just kick **npm start** and open URL http://localhost:8080/trailer?resource=https://content.viaplay.se/pc-se/film/ted-2-2015
+.. then just kick **npm start** and open URL curl -i http://localhost:8080/trailer?resource=https://content.viaplay.se/pc-se/film/ted-2-2015
 
 To fire test just hit **npm test**
 
