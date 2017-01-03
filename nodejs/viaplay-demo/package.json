@@ -2,7 +2,7 @@
   "name": "viaplay-rest",
   "version": "1.0.0",
   "description": "Demo project for viaplay REST",
-  "main": "server.js",
+  "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "test" : "mocha test --timeout 20000"

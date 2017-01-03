@@ -10,7 +10,11 @@ module.exports = router;
 const imdAPIKey = '8c5e88c814cb15cf1c1e732f09c8bf60';
 const serviceTimeout = 10000;
 
-// Find trailer operation
+//*********************************** 
+// API resource: /trailer operation
+// Will return the trailer URL
+//***********************************
+
 function findTrailer(req, res, next) {
   
   res.set({'content-type': 'text/plain'});
@@ -28,7 +32,7 @@ function findTrailer(req, res, next) {
 
 }
 
-// validate request to prevent invalid requests.
+// Validate request to prevent invalid requests.
 function validateRequest(resourceURL) {
 
 	return new Promise(function(fullfill, reject) {
@@ -43,7 +47,7 @@ function validateRequest(resourceURL) {
 	
 }
 
-// get viaplay content info
+// GET viaplay content info
 function getViaplayContent(resourceURL) {
 
 	return new Promise(function(fullfill, reject) {
@@ -62,7 +66,7 @@ function getViaplayContent(resourceURL) {
 	});
 };
 
-// get IMDB trailer URL based on a movie id.
+// GET IMDB trailer URL based on a movie id.
 function getImdbTrailerURL(movieID ) {
 	
 	return new Promise(function(fullfill, reject) {
@@ -78,7 +82,6 @@ function getImdbTrailerURL(movieID ) {
 		});
 	});
 };
-
 
 function createError(httpCode, message) {
 	return {code:httpCode, error: message};
