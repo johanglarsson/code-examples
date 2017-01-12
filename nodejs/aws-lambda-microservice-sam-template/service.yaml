@@ -1,0 +1,283 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Lambda function and role for MSTemplate
+Parameters:
+  ResourceContext: 
+    Type: String
+    Default: demo
+    Description: The resource context
+  ApplicationName: 
+    Type: String
+    Default: ms-template
+    Description: The name of the application
+Resources:
+  #################################
+  # MICROSERVICE ROLE
+  #################################
+  MsTemplateRole: 
+    Type: "AWS::IAM::Role"
+    Properties: 
+      RoleName: !Join [ "", [!Ref "ApplicationName","-template-role-",!Ref "ResourceContext"]]
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Principal: 
+              Service: 
+                - "lambda.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      Path: "/"
+  RolePolicies:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: !Join [ "", [!Ref "ApplicationName","-template-policy-",!Ref "ResourceContext"]]#Policy to let role invoke lambda function
+      PolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          -
+            Effect: "Allow"
+            Action:
+              - "logs:CreateLogGroup"
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+              - "logs:PutSubscriptionFilter"
+            Resource: "arn:aws:logs:*:*:*"
+          -
+            Effect: "Allow"
+            Action:
+              - "dynamodb:Put"
+              - "dynamodb:PutItem"
+              - "dynamodb:Get"
+              - "dynamodb:GetItem"
+              - "dynamodb:Query"
+            Resource:
+              - !Join [ "", ["arn:aws:dynamodb:", !Ref "AWS::Region", ":*:table/",!Ref "ApplicationName","-template-", !Ref "ResourceContext"]]
+      Roles:
+        -
+          Ref: "MsTemplateRole"
+  #################################
+  # DYNAMODB simple resource
+  #################################
+  templateTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties: 
+      AttributeDefinitions: 
+        - 
+          AttributeName: "orderId"
+          AttributeType: "S"
+      KeySchema: 
+        - 
+          AttributeName: "orderId"
+          KeyType: "HASH"
+      ProvisionedThroughput: 
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      TableName: !Join [ "",[!Ref "ApplicationName","-template-", !Ref "ResourceContext"]]
+  ################################
+  ## LAMBDA DEFINITION:
+  ## CreateOrderFunction + Log to Elasticsearch
+  ################################ 
+  createOrderFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: !Join [ "",[!Ref "ApplicationName", "-createOrder-", !Ref "ResourceContext"]]
+      Handler: "index.create"
+      Description: "DW microservice template for create order"
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref templateTable
+      Role: 
+       Fn::GetAtt:
+        - "MsTemplateRole"
+        - "Arn"
+      Code: "backend-function"
+      MemorySize: 512
+      Runtime: "nodejs4.3"
+      Timeout: "15"
+  # Log group for elasticsearch subscription
+  CreateOrderLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties: 
+      LogGroupName: !Join [ "",["/aws/lambda/",!Ref "ApplicationName", "-createOrder-", !Ref "ResourceContext"]]
+  #PUSH LOG ENTRIES TO KINESIS STREAM FOR FURTHER PROCESSING
+  CreateOrderLogSubscription:
+    Type: "AWS::Logs::SubscriptionFilter"
+    DependsOn:
+      - CreateOrderLogGroup
+    Properties: 
+      DestinationArn: arn:aws:kinesis:eu-west-1:XXXXXX:stream/core-cloudwatch-log
+      FilterPattern: ""
+      RoleArn: "arn:aws:iam::XXXXX:role/CoreCloudwatchKinesisRole"
+      LogGroupName: !Join [ "",["/aws/lambda/",!Ref "ApplicationName", "-createOrder-", !Ref "ResourceContext"]]
+  # Give API gateway API ID access to our lambda only.
+  APIGatewayPutInvokePermission: 
+    Type: "AWS::Lambda::Permission"
+    DependsOn:
+      - createOrderFunction
+      - ApiGwOrdersPutMethod
+    Properties: 
+      FunctionName: !Ref createOrderFunction
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Join [ "",["arn:aws:execute-api:",!Ref "AWS::Region",":",!Ref "AWS::AccountId",":",!Ref "msTemplateAPI", "/*/PUT/*"]]
+  ################################
+  ## LAMBDA DEFINITION:
+  ## GetOrderFunction + Log to Elasticsearch
+  ################################  
+  getOrderFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: !Join [ "",[!Ref "ApplicationName","-getOrder-", !Ref "ResourceContext"]]
+      Handler: "index.get"
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref templateTable
+      Description: "DW microservice template for get order"
+      Role: 
+       Fn::GetAtt:
+        - "MsTemplateRole"
+        - "Arn"
+      Code: "backend-function"
+      Runtime: "nodejs4.3"
+      MemorySize: 512
+      Timeout: "15"
+  # Log group for elasticsearch subscription. 
+  GetOrderLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties: 
+      LogGroupName: !Join [ "",["/aws/lambda/",!Ref "ApplicationName", "-getOrder-", !Ref "ResourceContext"]]
+  # Give API gateway API ID access to our lambda only.
+  GetOrderLogSubscription:
+    Type: "AWS::Logs::SubscriptionFilter"
+    DependsOn:
+      - GetOrderLogGroup
+    Properties: 
+      DestinationArn: arn:aws:kinesis:eu-west-1:XXXXX:stream/core-cloudwatch-log
+      RoleArn: "arn:aws:iam::XXXX:role/CoreCloudwatchKinesisRole"
+      FilterPattern: ""
+      LogGroupName: !Join [ "",["/aws/lambda/",!Ref "ApplicationName", "-getOrder-", !Ref "ResourceContext"]]
+  # Give API gateway API ID access to our lambda only.
+  APIGatewayGetInvokePermission: 
+    Type: "AWS::Lambda::Permission"
+    DependsOn:
+      - getOrderFunction
+      - ApiGwOrdersGetMethod
+    Properties: 
+      FunctionName: !Ref getOrderFunction
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Join [ "",["arn:aws:execute-api:",!Ref "AWS::Region",":",!Ref "AWS::AccountId",":",!Ref "msTemplateAPI", "/*/GET/orders/*"]]
+  #################################
+  # API GATEWAY DEFINITION
+  #################################
+  msTemplateAPI:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Name: !Join [ "",[!Ref "ApplicationName", " Template API ", !Ref "ResourceContext"]]
+      Description: "Template API"
+      BodyS3Location: "../api/swagger-cors.yaml"
+  # RESOURCE: /orders
+  ApiGwOrdersResource: 
+    Type: "AWS::ApiGateway::Resource"
+    Properties: 
+      RestApiId: 
+       Ref: "msTemplateAPI"
+      ParentId: 
+        Fn::GetAtt: 
+          - "msTemplateAPI"
+          - "RootResourceId"
+      PathPart: "orders"
+  # RESOURCE {orderid} 
+  ApiGwOrderIdResource: 
+    Type: "AWS::ApiGateway::Resource"
+    Properties: 
+      RestApiId: 
+        Ref: "msTemplateAPI"
+      ParentId: 
+        Ref: "ApiGwOrdersResource"
+      PathPart: "{orderid}"
+  # METHOD - GET on /orders/{orderid}
+  ApiGwOrdersGetMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "NONE"
+      HttpMethod: "GET"
+      Integration:
+        Type: "AWS_PROXY"
+        IntegrationHttpMethod: "POST"
+        Uri: !Join [ "", ["arn:aws:apigateway:", !Ref "AWS::Region", ":lambda:path/2015-03-31/functions/", !GetAtt getOrderFunction.Arn, "/invocations"]]
+        RequestParameters:
+          integration.request.path.orderid: method.request.path.orderid
+      ResourceId: !Ref "ApiGwOrderIdResource"
+      RequestParameters:
+        method.request.path.orderid: true
+      RestApiId:
+        Ref: "msTemplateAPI"
+  # METHOD - PUT on /orders
+  ApiGwOrdersPutMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "None"
+      HttpMethod: "PUT"
+      Integration:
+        Type: "AWS_PROXY"
+        IntegrationHttpMethod: "POST"
+        Uri: !Join [ "", ["arn:aws:apigateway:", !Ref "AWS::Region", ":lambda:path/2015-03-31/functions/", !GetAtt createOrderFunction.Arn, "/invocations"]]
+      ResourceId: !Ref "ApiGwOrdersResource"
+      RestApiId:
+        Ref: "msTemplateAPI"
+  # METHOD - CORS
+  ApiGwOrdersOptionsMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "None"
+      HttpMethod: "OPTIONS"
+      Integration:
+        Type: "MOCK"
+        RequestTemplates:
+          "application/json": "{\"statusCode\":\"200\"}"
+        IntegrationResponses:
+            - ResponseParameters:
+                method.response.header.Access-Control-Allow-Origin: "'*'"
+                method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                method.response.header.Access-Control-Allow-Methods: "'OPTIONS,GET'"
+              StatusCode: "200"
+        RequestTemplates:
+          application/json: ""
+      ResourceId: !Ref "ApiGwOrderIdResource"
+      RestApiId:
+        Ref: "msTemplateAPI"
+      MethodResponses:
+          - ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: true
+              method.response.header.Access-Control-Allow-Headers: true
+              method.response.header.Access-Control-Allow-Methods: true
+            StatusCode: "200"
+  ####################################
+  # API DEPLOYMENT AND STAGE CREATION
+  ####################################
+  APIDeployment: 
+    Type: "AWS::ApiGateway::Deployment"
+    DependsOn: 
+      - ApiGwOrdersOptionsMethod
+      - ApiGwOrdersPutMethod 
+      - ApiGwOrdersGetMethod
+    Properties: 
+      RestApiId: !Ref msTemplateAPI
+  ApiStage:
+    Type: "AWS::ApiGateway::Stage"
+    Properties:
+      DeploymentId: !Ref APIDeployment
+      RestApiId: !Ref msTemplateAPI
+      StageName: !Ref ResourceContext
+      MethodSettings:
+        -
+          DataTraceEnabled: "true"
+          HttpMethod: "PUT"
+          LoggingLevel: "INFO"
+          MetricsEnabled: "true"
+          ResourcePath: "/orders"
+          ThrottlingBurstLimit: 10
+          ThrottlingRateLimit: 10
