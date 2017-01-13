@@ -2,7 +2,6 @@
 
 var AWS = require('aws-sdk');
 var async = require('async');
-require('dotenv').load()
 AWS.config.apiVersions = {
 	dynamodb : "2012-08-10"
 }
@@ -14,7 +13,6 @@ var kinesis = new AWS.Kinesis()
 var lambda = new AWS.Lambda()
 
 exports.create = (event, context, cb) => {
-	console.log('Table is: ' + process.env.TABLE_NAME)
 
 	//****************************
 	// Microservice steps:
