@@ -1,0 +1,23 @@
+{
+  "name": "aws-lambda-microservice-sam-template",
+  "version": "1.0.0",
+  "description": "A sample microservice lambda project",
+  "main": "backend-function/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "MICROSERVICE",
+    "LAMBDA",
+    "AWS"
+  ],
+  "author": "Johan Larsson",
+  "license": "ISC",
+  "devDependencies": {
+    "dotenv": "^4.0.0",
+    "grunt-aws-lambda": "^0.13.0"
+  },
+  "dependencies": {
+    "async": "^2.1.4"
+  }
+}

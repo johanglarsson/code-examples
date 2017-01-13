@@ -6,14 +6,14 @@ grunt.initConfig({
       create: {
          options: {
             handler : 'create',
-            file_name: 'api-backend-function/index.js',
+            file_name: 'backend-function/index.js',
             event: 'event-create.json'
          }
       },
       get: {
          options: {
             handler : 'get',
-            file_name: 'api-backend-function/index.js',
+            file_name: 'backend-function/index.js',
             event: 'event-get.json'
          }
       }
