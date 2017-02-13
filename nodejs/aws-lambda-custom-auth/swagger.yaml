@@ -1,0 +1,45 @@
+---
+swagger: "2.0"
+info:
+  version: "2017-02-13T08:25:04Z"
+  title: "Custom Authorizer API"
+host: "d7uzzv50i6.execute-api.us-east-1.amazonaws.com"
+basePath: "/dev"
+schemes:
+- "https"
+paths:
+  /test:
+    put:
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+      security:
+      - MyAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:864430618126:function:${stageVariables.LambdaFunctionName}/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+securityDefinitions:
+  MyAuthorizer:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+    x-amazon-apigateway-authtype: "custom"
+    x-amazon-apigateway-authorizer:
+      authorizerCredentials: "arn:aws:iam::864430618126:role/myJohanRole"
+      authorizerUri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:864430618126:function:custauth-authorizeJWT-dev/invocations"
+      authorizerResultTtlInSeconds: 300
+      type: "token"
+definitions:
+  Empty:
+    type: "object"
+    title: "Empty Schema"

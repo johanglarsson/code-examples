@@ -1,0 +1,122 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Lambda function and role for custom authorizer
+Parameters:
+  ApplicationName:
+    Default: sample
+    Description: The name of the application
+    Type: String
+  ResourceContext:
+    Default: demo
+    Description: The resource context
+    Type: String
+Resources:
+  APIGatewayGetInvokePermission:
+    DependsOn:
+    - CustomAuthorizerBackendLambda
+    - CustomAuthorizerAPI
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: CustomAuthorizerBackendLambda
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+        - ''
+        - - 'arn:aws:execute-api:'
+          - Ref: AWS::Region
+          - ':'
+          - Ref: AWS::AccountId
+          - ':'
+          - Ref: CustomAuthorizerAPI
+          - /*/PUT/*
+    Type: AWS::Lambda::Permission
+  CustomAuthorizerAPI:
+    Properties:
+      DefinitionUri: s3://dwtech-samples/1cfaef89a8bb2cba446a102b15d7095f
+      StageName: dev
+      Variables:
+        LambdaFunctionName:
+          Ref: CustomAuthorizerBackendLambda
+    Type: AWS::Serverless::Api
+  CustomAuthorizerBackendLambda:
+    Properties:
+      Code:
+        S3Bucket: dwtech-samples
+        S3Key: b8c902fab243d95bf88fabb1045a4c24
+      Description: Custom authorizer samples
+      FunctionName:
+        Fn::Join:
+        - ''
+        - - Ref: ApplicationName
+          - -backend-service-
+          - Ref: ResourceContext
+      Handler: index.handler
+      MemorySize: 512
+      Role:
+        Fn::GetAtt:
+        - SampleCustomAuthorizerRole
+        - Arn
+      Runtime: nodejs4.3
+      Timeout: '15'
+    Type: AWS::Lambda::Function
+  CustomAuthorizerLambda:
+    Properties:
+      Code:
+        S3Bucket: dwtech-samples
+        S3Key: 674c849c81dcf83a704102a5bc623b83
+      Description: Custom authorizer samples
+      FunctionName:
+        Fn::Join:
+        - ''
+        - - Ref: ApplicationName
+          - -authorizeJWT-
+          - Ref: ResourceContext
+      Handler: index.handler
+      MemorySize: 512
+      Role:
+        Fn::GetAtt:
+        - SampleCustomAuthorizerRole
+        - Arn
+      Runtime: nodejs4.3
+      Timeout: '15'
+    Type: AWS::Lambda::Function
+  RolePolicies:
+    Properties:
+      PolicyDocument:
+        Statement:
+        - Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Effect: Allow
+          Resource: arn:aws:logs:*:*:*
+        Version: '2012-10-17'
+      PolicyName:
+        Fn::Join:
+        - ''
+        - - Ref: ApplicationName
+          - -sample-policy-
+          - Ref: ResourceContext
+      Roles:
+      - Ref: SampleCustomAuthorizerRole
+    Type: AWS::IAM::Policy
+  SampleCustomAuthorizerRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+        Version: '2012-10-17'
+      Path: /
+      RoleName:
+        Fn::Join:
+        - ''
+        - - Ref: ApplicationName
+          - -sample-role-
+          - Ref: ResourceContext
+    Type: AWS::IAM::Role
+Transform: AWS::Serverless-2016-10-31

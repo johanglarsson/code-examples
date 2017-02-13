@@ -1,0 +1,103 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Lambda function and role for custom authorizer
+Parameters:
+  ResourceContext: 
+    Type: String
+    Default: demo
+    Description: The resource context
+  ApplicationName: 
+    Type: String
+    Default: sample
+    Description: The name of the application
+Resources:
+  #################################
+  # MICROSERVICE ROLE
+  #################################
+  SampleCustomAuthorizerRole: 
+    Type: "AWS::IAM::Role"
+    Properties: 
+      RoleName: !Join [ "", [!Ref "ApplicationName","-sample-role-",!Ref "ResourceContext"]]
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Principal: 
+              Service: 
+                - "lambda.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      Path: "/"
+  RolePolicies:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: !Join [ "", [!Ref "ApplicationName","-sample-policy-",!Ref "ResourceContext"]]#Policy to let role invoke lambda function
+      PolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          -
+            Effect: "Allow"
+            Action:
+              - "logs:CreateLogGroup"
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+            Resource: "arn:aws:logs:*:*:*"
+      Roles:
+        -
+          Ref: "SampleCustomAuthorizerRole"
+  ################################
+  ## LAMBDA DEFINITION:
+  ################################  
+  CustomAuthorizerLambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: !Join [ "",[!Ref "ApplicationName","-authorizeJWT-", !Ref "ResourceContext"]]
+      Handler: "index.handler"
+      Description: "Custom authorizer samples"
+      Role: 
+       Fn::GetAtt:
+        - "SampleCustomAuthorizerRole"
+        - "Arn"
+      Code: "custom-authjwt-service"
+      Runtime: "nodejs4.3"
+      MemorySize: 512
+      Timeout: "15"
+  CustomAuthorizerBackendLambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: !Join [ "",[!Ref "ApplicationName","-backend-service-", !Ref "ResourceContext"]]
+      Handler: "index.handler"
+      Description: "Custom authorizer samples"
+      Role: 
+       Fn::GetAtt:
+        - "SampleCustomAuthorizerRole"
+        - "Arn"
+      Code: "custom-auth-backend-service"
+      Runtime: "nodejs4.3"
+      MemorySize: 512
+      Timeout: "15"
+  # Give API gateway API ID access to our lambda only.
+  APIGatewayGetInvokePermission: 
+    Type: "AWS::Lambda::Permission"
+    DependsOn:
+      - CustomAuthorizerBackendLambda
+      - CustomAuthorizerAPI
+    Properties: 
+      FunctionName: !Ref CustomAuthorizerBackendLambda
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Join [ "",["arn:aws:execute-api:",!Ref "AWS::Region",":",!Ref "AWS::AccountId",":",!Ref "CustomAuthorizerAPI", "/*/PUT/*"]]
+  #################################
+  # API GATEWAY DEFINITION
+  #################################
+  CustomAuthorizerAPI:
+    Type: "AWS::Serverless::Api"
+    Properties:      
+      DefinitionUri: "swagger.yaml"
+      StageName: dev
+      Variables:
+        # NOTE: Before using this template, replace the <<region>> and <<account>> fields
+        #       in Lambda integration URI in the swagger file to region and accountId 
+        #       you are deploying to
+        LambdaFunctionName: !Ref CustomAuthorizerBackendLambda
