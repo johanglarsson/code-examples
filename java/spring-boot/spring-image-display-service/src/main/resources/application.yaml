@@ -1,0 +1,4 @@
+app:
+  useExternalLobsService: true
+  lobsExternalUrl: https://lobs.se/rekrytering_flera.php
+  lobsClasspathFile: classpath:example-with-many.txt

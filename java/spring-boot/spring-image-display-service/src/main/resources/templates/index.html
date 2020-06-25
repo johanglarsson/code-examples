@@ -1,0 +1,69 @@
+<!DOCTYPE HTML>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Welcome</title>
+    <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css">
+    <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
+    <link rel="stylesheet" href="/webjars/font-awesome/5.12.0/css/fontawesome.css">
+    <link rel="stylesheet" href="/webjars/font-awesome/5.12.0/css/solid.css">
+    <link rel="stylesheet" href="/webjars/font-awesome/5.12.0/css/regular.css">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.4.1/css/bootstrap.min.css}"/>
+    <script src="/webjars/jquery/3.5.1/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script language="JavaScript" type="text/javascript" src="/js/main.js"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<div class="container">
+
+</div>
+
+
+<div class="container">
+
+    <div class="row">
+        <div class="col-7">
+            <h1 class="font-weight-light text-center text-lg-left mt-4 mb-0">Bildgalleri</h1>
+        </div>
+        <div class="col-5 fa-pull-right">
+        </div>
+    </div>
+
+    <hr class="mt-2 mb-5">
+    <div class="row" style="height: 100px">
+        <div class="col-6">
+            <a class="btn fa fa-pull-left" onclick="updateImages()" data-toggle="tooltip" data-placement="top"
+               title="Uppdatera">
+                <span class="fas fa-sync-alt"></span>
+            </a>
+        </div>
+        <div class="col-6">
+            <a class="btn fa-pull-right" data-toggle="modal"
+               th:data-target="'#aboutModal'" title="Om mig">
+                <span class="far fa-address-card"></span>
+            </a>
+        </div>
+    </div>
+    <div data-th-replace="about:: modal"></div>
+
+    <div id="images" class="row">
+        <div id="image" class="row text-center text-lg-left">
+            <div th:each="entry: ${images}" class="col-lg-3 col-md-4 col-6">
+                <a data-th-href="${entry.url}" class="d-block mb-4 h-100">
+                    <img onerror="this.onerror=null" class="img-fluid img-thumbnail"
+                         data-th-src="@{'data:'+entry.contentType+';base64,'+${entry.imageData}}"
+                         alt="">
+                    <p data-th-text="${entry.caption}"></p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+
+</html>
