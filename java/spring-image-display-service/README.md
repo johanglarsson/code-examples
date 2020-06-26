@@ -25,7 +25,7 @@ First, you must have JDK 11 installed on your machine.
 
 Then, you have two options:
 1. Using maven and command `mvnw.bat spring-boot:run`. This is only if you are using Windows. If you are on Linux then you have to install maven and java 11.
-2. java -jar spring-image-display-service-1.0.0-SNAPSHOT.jar if you already have the packaged jar.
+2. `java -jar app.jar`. This is a pre-packaged one ready for docker.
 
 Above commands will start a web server listening on http://localhost:8080
 
