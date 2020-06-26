@@ -28,7 +28,8 @@ public class ClassPathResourceImageRepository implements ImageRepository, Initia
                   .map(String::new)
                   .map(page -> conversionService.convert(page, ImageLocations.class))
                   .onSuccess(imageLocations -> log.info("Retrieved from classpath repository {}", imageLocations))
-                  .getOrElseThrow(e -> new RuntimeException("Unable to retrieve local classpath resource", e));
+                  .getOrElseThrow(e -> new RuntimeException("Unable to retrieve repository from local classpath resource " + setting
+                          .getLobsClasspathFile().getFilename(), e));
     }
 
     @Override

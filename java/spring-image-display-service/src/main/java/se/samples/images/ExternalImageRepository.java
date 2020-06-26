@@ -30,7 +30,8 @@ public class ExternalImageRepository implements ImageRepository, InitializingBea
                   .map(HttpEntity::getBody)
                   .map(page -> conversionService.convert(page, ImageLocations.class))
                   .onSuccess(imageLocations -> log.info("Retrieved from external repository {}", imageLocations))
-                  .getOrElseThrow(e -> new RuntimeException("Unable to retrieve Lobs external resource"));
+                  .getOrElseThrow(e -> new RuntimeException("Unable to retrieve repository from external resource " + setting
+                          .getLobsExternalUrl().toString()));
     }
 
     @Override

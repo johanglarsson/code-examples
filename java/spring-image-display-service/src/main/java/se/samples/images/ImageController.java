@@ -1,5 +1,6 @@
 package se.samples.images;
 
+import io.vavr.control.Try;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -22,7 +23,10 @@ public class ImageController {
     @RequestMapping("/images")
     public String showContentPart(final Model model) {
         log.info("All images");
-        model.addAttribute("images", imageService.getImages());
+        Try.of(imageService::getImages)
+           .onSuccess(images -> model.addAttribute("images", images))
+           .onFailure(e -> model.addAttribute("error", e.getMessage()))
+           .onFailure(e -> log.error("Unable to display home page", e));
         return "index :: #images";
     }
 

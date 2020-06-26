@@ -50,6 +50,9 @@
     <div data-th-replace="about:: modal"></div>
 
     <div id="images" class="row">
+        <div id="error" th:if="${error}">
+            <p data-th-text="${error}"></p>
+        </div>
         <div id="image" class="row text-center text-lg-left">
             <div th:each="entry: ${images}" class="col-lg-3 col-md-4 col-6">
                 <a data-th-href="${entry.url}" class="d-block mb-4 h-100">

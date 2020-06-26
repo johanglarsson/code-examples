@@ -5,7 +5,6 @@ $(document).ready(function () {
 
     setInterval(function () {
         updateImages()
-        console.log("Hit")
     }, 30000)
 });
 
@@ -15,7 +14,7 @@ function updateImages() {
     $.get("images", function (fragment) {
         $("#images").replaceWith(fragment)
         NProgress.done();
-    })
+    });
 }
 
 function modal() {
