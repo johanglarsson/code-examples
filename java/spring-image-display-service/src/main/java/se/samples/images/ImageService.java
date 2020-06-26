@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -14,11 +13,13 @@ import se.samples.images.entities.Image;
 import se.samples.images.entities.ImageLocation;
 import se.samples.images.entities.ImageLocations;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import static java.util.stream.Collectors.toList;
+import static org.springframework.http.HttpMethod.GET;
 
 @Slf4j
 @Service
@@ -51,11 +52,12 @@ public class ImageService {
         return CompletableFuture
                 .supplyAsync(() -> Try
                         .of(() -> restTemplate
-                                .exchange(imageLocation.getUrl(), HttpMethod.GET, httpHeaders(), byte[].class))
+                                .exchange(URI.create(imageLocation.getUrl()), GET, httpHeaders(), byte[].class))
                         .filter(this::hasContentType)
                         .filter(this::isImage)
                         .onSuccess(image -> log.debug("Loaded {}", image.getHeaders()))
                         .map(responseEntity -> createImage(imageLocation, responseEntity))
+                        .onFailure(error -> log.info("Image could not be loaded", error))
                         .getOrNull());
     }
 

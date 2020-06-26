@@ -1,4 +1,4 @@
 app:
   useExternalRepository: false
-  lobsExternalUrl: https://whatever
+  lobsExternalUrl: https://youwish
   lobsClasspathFile: classpath:example-with-many.txt
