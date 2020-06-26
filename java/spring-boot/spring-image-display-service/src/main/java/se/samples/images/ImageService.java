@@ -4,13 +4,15 @@ import io.vavr.control.Try;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import se.samples.images.entities.Image;
 import se.samples.images.entities.ImageLocation;
 import se.samples.images.entities.ImageLocations;
-import se.samples.images.entities.Setting;
 
 import java.util.List;
 import java.util.Objects;
@@ -23,20 +25,13 @@ import static java.util.stream.Collectors.toList;
 @AllArgsConstructor
 public class ImageService {
 
-    private final Setting setting;
-
-    private final ImageRepository externalImageRepository;
-
-    private final ImageRepository classPathResourceImageRepository;
+    private final ImageRepository imageRepository;
 
     private final RestTemplate restTemplate;
 
     public List<Image> getImages() {
-        var imageLocations = setting.getUseExternalLobsService() ?
-                externalImageRepository.getImageLocations() :
-                classPathResourceImageRepository.getImageLocations();
         log.info("Loading images from external sources");
-        var images = getAllImages(imageLocations);
+        var images = getAllImages(imageRepository.getImageLocations());
         log.info("[{}] images loaded", images.size());
         return images;
 
@@ -54,11 +49,25 @@ public class ImageService {
 
     private CompletableFuture<Image> retrieveExternalImage(ImageLocation imageLocation) {
         return CompletableFuture
-                .supplyAsync(() -> Try.of(() -> restTemplate.getForEntity(imageLocation.getUrl(), byte[].class))
-                                      .filter(this::isImage)
-                                      .onSuccess(image -> log.info("Loaded {}", image))
-                                      .map(responseEntity -> createImage(imageLocation, responseEntity))
-                                      .getOrNull());
+                .supplyAsync(() -> Try
+                        .of(() -> restTemplate
+                                .exchange(imageLocation.getUrl(), HttpMethod.GET, httpHeaders(), byte[].class))
+                        .filter(this::hasContentType)
+                        .filter(this::isImage)
+                        .onSuccess(image -> log.debug("Loaded {}", image.getHeaders()))
+                        .map(responseEntity -> createImage(imageLocation, responseEntity))
+                        .getOrNull());
+    }
+
+    private HttpEntity<HttpHeaders> httpHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setPragma("no-cache");
+        headers.setCacheControl("no-cache, no-store, must-revalidate, max-age=0");
+        return new HttpEntity<>(headers);
+    }
+
+    private boolean hasContentType(ResponseEntity<byte[]> response) {
+        return response.getHeaders().getContentType() != null;
     }
 
     private boolean isImage(ResponseEntity<byte[]> responseEntity) {

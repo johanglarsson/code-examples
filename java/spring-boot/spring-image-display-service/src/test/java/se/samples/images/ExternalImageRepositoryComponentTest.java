@@ -18,7 +18,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+
+@SpringBootTest(properties = {"app.useExternalRepository = true"})
 class ExternalImageRepositoryComponentTest {
 
     @MockBean
@@ -28,13 +29,13 @@ class ExternalImageRepositoryComponentTest {
     ResponseEntity<String> mockResponseEntity;
 
     @Autowired
-    private ImageRepository externalImageRepository;
+    private ImageRepository imageRepository;
 
     @Test
     void givenLobsServiceExist_shouldReturnImageLocations() {
         when(mockRestTemplate.getForEntity(anyString(), eq(String.class))).thenReturn(mockResponseEntity);
         when(mockResponseEntity.getBody()).thenReturn(mockedResult());
-        final ImageLocations imageLocations = externalImageRepository.getImageLocations();
+        final ImageLocations imageLocations = imageRepository.getImageLocations();
         assertThat(imageLocations.getImageLocations()).hasSize(3);
     }
 

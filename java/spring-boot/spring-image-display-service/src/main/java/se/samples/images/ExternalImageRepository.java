@@ -2,16 +2,21 @@ package se.samples.images;
 
 import io.vavr.control.Try;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpEntity;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestTemplate;
 import se.samples.images.entities.ImageLocations;
 import se.samples.images.entities.Setting;
 
-@Service("externalImageRepository")
+@Repository
+@ConditionalOnProperty(name = "app.useExternalRepository", havingValue = "true")
 @AllArgsConstructor
-public class ExternalImageRepository implements ImageRepository {
+@Slf4j
+public class ExternalImageRepository implements ImageRepository, InitializingBean {
 
     private final Setting setting;
 
@@ -24,6 +29,12 @@ public class ExternalImageRepository implements ImageRepository {
         return Try.of(() -> restTemplate.getForEntity(setting.getLobsExternalUrl().toString(), String.class))
                   .map(HttpEntity::getBody)
                   .map(page -> conversionService.convert(page, ImageLocations.class))
+                  .onSuccess(imageLocations -> log.info("Retrieved from external repository {}", imageLocations))
                   .getOrElseThrow(e -> new RuntimeException("Unable to retrieve Lobs external resource"));
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        log.info("Initialized external repository with setting {}", setting.getLobsExternalUrl());
     }
 }

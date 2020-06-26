@@ -8,7 +8,7 @@ import java.net.URL;
 @Data
 public class Setting {
 
-    private Boolean useExternalLobsService;
+    private boolean useExternalRepository;
 
     private URL lobsExternalUrl;
 

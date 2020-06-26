@@ -57,6 +57,7 @@ public class PageToImageLocationsConverter implements Converter<String, ImageLoc
     private String extractDataTable(final String page) {
         return Arrays.stream(page.split(ROW_SPLIT_CHARACTER))
                      .filter(a -> a.contains(TABLE_HEADER))
+                     .peek(p -> log.info("Extracted [{}]", p))
                      .findFirst()
                      .orElse("");
     }

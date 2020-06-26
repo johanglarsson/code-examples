@@ -14,7 +14,6 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 import se.samples.images.entities.ImageLocation;
 import se.samples.images.entities.ImageLocations;
-import se.samples.images.entities.Setting;
 
 import java.net.URI;
 import java.util.List;
@@ -27,7 +26,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
-@SpringBootTest
+@SpringBootTest(properties = {"app.useExternalRepository = false"})
 class ImageServiceTest {
 
     private static final ImageLocation IMAGE_LOCATION = new ImageLocation("http://localhost:9000/myimage", "Test caption");
@@ -38,15 +37,9 @@ class ImageServiceTest {
     @Autowired
     private RestTemplate restTemplate;
 
-    @MockBean(ExternalImageRepository.class)
-    private ImageRepository externalImageRepository;
-
-    @MockBean(ClassPathResourceImageRepository.class)
-    private ImageRepository classPathResourceImageRepository;
-
     @MockBean
-    private Setting mockSetting;
-
+    private ImageRepository mockImageRepository;
+    
     private MockRestServiceServer mockServer;
 
     @BeforeEach
@@ -58,32 +51,18 @@ class ImageServiceTest {
     class givenValidLocations {
 
         @Test
-        void shouldCreateImage_whenManyLocationsFromExternalSource() {
+        void shouldCreateImage_whenManyLocationsFromRepository() {
 
             var imageLocations = new ImageLocations(List.of(IMAGE_LOCATION, IMAGE_LOCATION));
 
             setupMockServer(ExpectedCount.twice(), MediaType.IMAGE_JPEG, OK);
-            when(externalImageRepository.getImageLocations()).thenReturn(imageLocations);
-            when(mockSetting.getUseExternalLobsService()).thenReturn(true);
+            when(mockImageRepository.getImageLocations()).thenReturn(imageLocations);
 
             assertThat(imageService.getImages()).hasSize(2);
             mockServer.verify();
 
         }
 
-        @Test
-        void shouldCreateImage_whenManyLocationsFromClasspathSource() {
-
-            var imageLocations = new ImageLocations(List.of(IMAGE_LOCATION, IMAGE_LOCATION));
-
-            setupMockServer(ExpectedCount.twice(), MediaType.IMAGE_JPEG, OK);
-            when(classPathResourceImageRepository.getImageLocations()).thenReturn(imageLocations);
-            when(mockSetting.getUseExternalLobsService()).thenReturn(false);
-
-            assertThat(imageService.getImages()).hasSize(2);
-            mockServer.verify();
-
-        }
     }
 
     @Nested
@@ -96,8 +75,7 @@ class ImageServiceTest {
 
             var imageLocations = new ImageLocations(List.of(IMAGE_LOCATION));
 
-            when(externalImageRepository.getImageLocations()).thenReturn(imageLocations);
-            when(mockSetting.getUseExternalLobsService()).thenReturn(true);
+            when(mockImageRepository.getImageLocations()).thenReturn(imageLocations);
 
             assertThat(imageService.getImages()).isEmpty();
             mockServer.verify();
@@ -111,8 +89,7 @@ class ImageServiceTest {
             var imageLocations = new ImageLocations(List.of(IMAGE_LOCATION));
 
             setupMockServer(ExpectedCount.once(), MediaType.IMAGE_GIF, BAD_REQUEST);
-            when(externalImageRepository.getImageLocations()).thenReturn(imageLocations);
-            when(mockSetting.getUseExternalLobsService()).thenReturn(true);
+            when(mockImageRepository.getImageLocations()).thenReturn(imageLocations);
 
             assertThat(imageService.getImages()).isEmpty();
             mockServer.verify();

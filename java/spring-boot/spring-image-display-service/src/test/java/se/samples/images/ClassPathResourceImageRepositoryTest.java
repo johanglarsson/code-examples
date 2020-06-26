@@ -48,5 +48,4 @@ class ClassPathResourceImageRepositoryTest {
         verify(mockConversionService).convert(anyString(), eq(ImageLocations.class));
     }
 
-
 }
