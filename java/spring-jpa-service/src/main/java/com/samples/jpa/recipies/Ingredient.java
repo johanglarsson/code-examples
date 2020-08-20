@@ -20,9 +20,9 @@ public class Ingredient {
 
     private String name;
     private String amount;
-    private String unit;
+    private Unit unit;
 
-    public Ingredient(final String name, final String amount, final String unit) {
+    public Ingredient(final String name, final String amount, final Unit unit) {
         this.name = name;
         this.amount = amount;
         this.unit = unit;

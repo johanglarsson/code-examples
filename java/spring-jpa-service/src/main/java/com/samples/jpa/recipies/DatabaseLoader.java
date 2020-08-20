@@ -22,21 +22,22 @@ public class DatabaseLoader implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        Ingredient ingredient = new Ingredient();
-        ingredient.setAmount("1");
-        ingredient.setName("Florsocker");
-        ingredient.setUnit("dl");
-        Instruction instruction = new Instruction();
-        instruction.setInstruction("Marinate the fucker");
+        Recipe souvlakiRecipe = new Recipe();
+        souvlakiRecipe.setDescription("Chicken souvlaki");
 
-        Instruction instruction2 = new Instruction();
-        instruction2.setInstruction("Then apply the marinade");
+        Ingredient chickenIngredient = new Ingredient();
+        chickenIngredient.setAmount("1");
+        chickenIngredient.setName("Chicken");
+        chickenIngredient.setUnit(Unit.ST);
+        Instruction marinate = new Instruction();
+        marinate.setInstruction("Marinate the chicken");
 
-        Recipe recipe = new Recipe();
-        recipe.setDescription("Chicken souvlaki");
-        recipe.setIngredients(List.of(ingredient));
-        recipe.setInstructions(List.of(instruction, instruction2));
-        recipeRepository.save(recipe);
+        Instruction mixTzatziki = new Instruction();
+        mixTzatziki.setInstruction("Mix the tzatziki");
+
+        souvlakiRecipe.setIngredients(List.of(chickenIngredient));
+        souvlakiRecipe.setInstructions(List.of(marinate, mixTzatziki));
+        recipeRepository.save(souvlakiRecipe);
 
         log.info("Saved instructions and ingredients");
         log.info("Stored the first entries in the recipe database");
