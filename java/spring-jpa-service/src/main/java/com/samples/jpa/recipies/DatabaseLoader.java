@@ -15,10 +15,6 @@ public class DatabaseLoader implements CommandLineRunner {
 
     private final RecipeRepository recipeRepository;
 
-    private final IngredientRepository ingredientRepository;
-
-    private final InstructionRepository instructionRepository;
-
     @Override
     public void run(String... args) throws Exception {
 
@@ -39,7 +35,6 @@ public class DatabaseLoader implements CommandLineRunner {
         souvlakiRecipe.setInstructions(List.of(marinate, mixTzatziki));
         recipeRepository.save(souvlakiRecipe);
 
-        log.info("Saved instructions and ingredients");
         log.info("Stored the first entries in the recipe database");
 
         recipeRepository.findAll().forEach(repo -> log.info("Recipes {}-{}", repo.getId(), repo.getDescription()));

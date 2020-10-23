@@ -1,6 +1,5 @@
 package com.samples.jpa.recipies;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
