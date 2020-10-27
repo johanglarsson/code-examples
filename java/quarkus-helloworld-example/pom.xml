@@ -4,7 +4,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ninja</groupId>
-  <artifactId>quarkus-helloworld-service</artifactId>
+  <artifactId>quarkus-helloworld-example</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <properties>
     <surefire-plugin.version>2.22.1</surefire-plugin.version>
