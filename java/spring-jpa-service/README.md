@@ -9,6 +9,8 @@ I chose to test using XML migration scripts. They are located at classpath com/s
 
 The master script is db.changelog-master.xml which is the one executing the migrations.
 
+The only thing needed to make this work is the liquibase dependency and the configuration located at RecipeConfig.java.
+
 ## JPA entities
 
 Well, since I like to cook I chose a recipe database. I chose to not use lombok on the equals and hashcode due to it is not optimal for entities where I would like to have more control. 
@@ -17,4 +19,13 @@ The package is by feature so everyting, the controller, repositories and entitie
 
 ## API 
 
-Exposed at http://localhost:8080/swagger-ui.html 
+Exposed at http://localhost:8080/swagger-ui.html (OpenAPI)
+
+## H2 in-memory database
+
+Access at http://localhost:8080/h2-console
+
+Use jdbc:h2:mem:recipedb with pwd sa and you are a happy camper.
+
+If you want to try out the migration part of liquibase then just switch to a file based db to get the data persisted in application.properties. Eg. jdbc:h2:file:~/recipedb
+
