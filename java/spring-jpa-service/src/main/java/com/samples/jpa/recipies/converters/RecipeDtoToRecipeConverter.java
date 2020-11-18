@@ -19,8 +19,8 @@ public class RecipeDtoToRecipeConverter implements Converter<RecipeDto, Recipe> 
     public Recipe convert(RecipeDto source) {
         Recipe recipe = new Recipe();
         recipe.setDescription(source.getDescription());
-        recipe.setIngredients(source.getIngredients().stream().map(this::toIncredient).collect(Collectors.toList()));
-        recipe.setInstructions(source.getInstructions().stream().map(this::toInstruction).collect(Collectors.toList()));
+        recipe.setIngredients(source.getIngredients().stream().map(this::toIncredient).collect(Collectors.toSet()));
+        recipe.setInstructions(source.getInstructions().stream().map(this::toInstruction).collect(Collectors.toSet()));
         return recipe;
     }
 

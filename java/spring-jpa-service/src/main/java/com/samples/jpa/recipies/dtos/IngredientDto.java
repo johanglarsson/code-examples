@@ -8,7 +8,7 @@ import lombok.Data;
 public class IngredientDto {
 
     private String name;
-    private String amount;
+    private int amount;
     private Unit unit;
 
 }
