@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import liquibase.integration.spring.SpringLiquibase;
 
 @Configuration
-public class RecipeClonfig {
+public class RecipeConfig {
 
     @Autowired
     private DataSource dataSource;
@@ -17,7 +17,7 @@ public class RecipeClonfig {
     @Bean
     public SpringLiquibase liquibase() {
         SpringLiquibase liquibase = new SpringLiquibase();
-        liquibase.setChangeLog("classpath:com/samples/jpa/recipies/changelog/db.changelog-master.xml");
+        liquibase.setChangeLog("classpath:changelog/db.changelog-master.xml");
         liquibase.setDataSource(dataSource);
         return liquibase;
     }

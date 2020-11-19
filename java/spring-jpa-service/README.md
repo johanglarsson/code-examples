@@ -5,7 +5,7 @@ This service is a learning project for JPA entities. It uses Liquibase for datab
 
 ## Liquibase migration scripts
 
-I chose to test using XML migration scripts. They are located at classpath com/samples/jpa/recipies/changelog. 
+I chose to test using XML migration scripts. They are located at classpath changelog. 
 
 The master script is db.changelog-master.xml which is the one executing the migrations.
 
@@ -28,4 +28,14 @@ Access at http://localhost:8080/h2-console
 Use jdbc:h2:mem:recipedb with pwd sa and you are a happy camper.
 
 If you want to try out the migration part of liquibase then just switch to a file based db to get the data persisted in application.properties. Eg. jdbc:h2:file:~/recipedb
+
+## Docker
+
+Docker image can be created in two ways. both using layering to improve performance.
+
+* Manually:
+  docker build -f src/main/docker/Dockerfile -t mytest:v1 .
+
+* Using build-pack
+  mvn spring-boot:build-image
 

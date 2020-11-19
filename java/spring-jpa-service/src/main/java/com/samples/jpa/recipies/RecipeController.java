@@ -17,18 +17,18 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RecipeController {
 
-    private final RecipeService recipeService;
+    private final RecipeRepository recipeRepository;
 
     private final ConversionService conversionService;
 
     @PostMapping("/api/v1/recipies/new")
     public void newRecipe(@RequestBody final RecipeDto recipeDto) {
-        recipeService.createRecipe(conversionService.convert(recipeDto, Recipe.class));
+        recipeRepository.save(conversionService.convert(recipeDto, Recipe.class));
     }
 
     @GetMapping("/api/v1/recipies")
     public List<RecipeDto> getRecipies() {
-        return recipeService.getRecipes().stream().map(recipe -> conversionService.convert(recipe, RecipeDto.class))
+        return recipeRepository.findAll().stream().map(recipe -> conversionService.convert(recipe, RecipeDto.class))
                 .collect(Collectors.toList());
     }
 
