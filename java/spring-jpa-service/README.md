@@ -31,10 +31,10 @@ If you want to try out the migration part of liquibase then just switch to a fil
 
 ## Docker
 
-Docker image can be created in two ways. both using layering to improve performance.
+Docker image can be created in two ways. Both are using layering to improve performance.
 
-* Manually:
-  docker build -f src/main/docker/Dockerfile -t mytest:v1 .
+* Manually using multistage build:
+  docker build -f src/main/docker/Dockerfile -t spring-jpa-service:v1 .
 
 * Using build-pack
   mvn spring-boot:build-image
