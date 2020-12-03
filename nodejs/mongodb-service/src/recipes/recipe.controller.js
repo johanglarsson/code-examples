@@ -9,7 +9,7 @@ module.exports = function (app) {
     const ROOT = '/api/v1/';
 
 
-    app.get(ROOT + 'recipe/:recipeId', (req, resp) => {
+    app.get('/api/v1/recipe/:recipeId', (req, resp) => {
         // #swagger.parameters['recipeId'] = { description: "Id to retrieve" } 
         // #swagger.description = 'Endpoint used to obatin a recipe'
         RecipeServiceInstance.find(req.params.recipeId)
@@ -22,7 +22,7 @@ module.exports = function (app) {
             );
     })
 
-    app.post(ROOT + 'simulaterecipe', (req, resp) => {
+    app.post('/api/v1/simulaterecipe', (req, resp) => {
         // #swagger.description = 'Simulate a recipe into mongodb to be used.'
         RecipeServiceInstance.load()
             .then(result => resp.status(200).send(result.ops[0]))

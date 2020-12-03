@@ -12,23 +12,28 @@ class RecipeService {
     db;
     collection;
 
+
+
+
     constructor() {
+    }
+
+    async connect() {
+        let client = await MongoClient.connect(url);
+        return client.db(dbName).collection(recipeCollectionName);
     }
 
     /**
      * Save recipe to database (Returns a promise)
      */
     async store(recipe) {
-        var client = await MongoClient.connect(url);
-        var db = client.db(dbName);
-        var collection = db.collection(recipeCollectionName);
+        let collection = await this.connect();
         return await collection.insertOne(recipe);
     }
 
     async find(recipeId) {
-        var client = await MongoClient.connect(url);
-        var db = client.db(dbName);
-        var collection = db.collection(recipeCollectionName);
+
+        let collection = await this.connect();
         return await collection.findOne({ id: recipeId }, { projection: { _id: 0 } });
     }
 
