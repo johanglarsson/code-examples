@@ -12,3 +12,4 @@ hs_err_pid*
 
 # do not check in node_modules
 node_modules
+target

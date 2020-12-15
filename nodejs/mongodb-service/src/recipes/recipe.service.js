@@ -23,6 +23,7 @@ class RecipeService {
         return client.db(dbName).collection(recipeCollectionName);
     }
 
+
     /**
      * Save recipe to database (Returns a promise)
      */
