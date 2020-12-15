@@ -1,0 +1,12 @@
+
+app:
+  security:
+    ldap:
+      url: ldap://localhost:389/
+      user: xxxx
+      password: xxxx
+      searchBase: DC=demo,DC=se
+    mappings:
+      defaultRole: user
+      roles:
+        fubar: admin
