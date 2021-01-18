@@ -34,15 +34,15 @@ If you want to try out the migration part of liquibase then just switch to a fil
 Docker image can be created in two ways. Both are using layering to improve performance.
 
 * Manually using Dockerfile WITH layering
-  docker build -t spring-jpa-service:dockerfile
+  ```docker build -t spring-jpa-service:dockerfile```
 
 * Using jib:
-  ./mvnw compile jib:dockerBuild -Dimage=spring-jpa-service:jib
+  ```./mvnw compile jib:dockerBuild -Dimage=spring-jpa-service:jib```
 
 * Using build-pack for Spring Boot
-  ./mvmw spring-boot:build-image
+  ```./mvmw spring-boot:build-image```
 
 ## Docker push
 
 * Using jib (This is to my private docker hub account):
-  ./mvnw compile jib:build -Dimage=registry-1.docker.io/jola04/spring-jpa-service:jib 
+  ```./mvnw compile jib:build -Dimage=registry-1.docker.io/jola04/spring-jpa-service:jib ```
