@@ -29,13 +29,20 @@ Use jdbc:h2:mem:recipedb with pwd sa and you are a happy camper.
 
 If you want to try out the migration part of liquibase then just switch to a file based db to get the data persisted in application.properties. Eg. jdbc:h2:file:~/recipedb
 
-## Docker
+## Docker build
 
 Docker image can be created in two ways. Both are using layering to improve performance.
 
-* Manually using multistage build:
-  docker build -f src/main/docker/Dockerfile -t spring-jpa-service:v1 .
+* Manually using Dockerfile WITH layering
+  docker build -t spring-jpa-service:dockerfile
 
-* Using build-pack
-  mvn spring-boot:build-image
+* Using jib:
+  ./mvnw compile jib:dockerBuild -Dimage=spring-jpa-service:jib
 
+* Using build-pack for Spring Boot
+  ./mvmw spring-boot:build-image
+
+## Docker push
+
+* Using jib (This is to my private docker hub account):
+  ./mvnw compile jib:build -Dimage=registry-1.docker.io/jola04/spring-jpa-service:jib 
