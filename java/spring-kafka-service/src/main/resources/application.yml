@@ -1,0 +1,10 @@
+spring:
+  kafka:
+    listener:
+      concurrency: 4
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+topic:
+  name: my.topic
+  num-of-partitions: 4
+  num-of-replicas: 4
