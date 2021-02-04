@@ -1,4 +1,4 @@
-package com.samples.kafka.order;
+package com.samples.kafka.home;
 
 import lombok.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;

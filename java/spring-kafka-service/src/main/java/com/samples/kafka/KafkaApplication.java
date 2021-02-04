@@ -1,19 +1,21 @@
 package com.samples.kafka;
 
-import com.samples.kafka.order.TopicProperties;
-import io.swagger.v3.oas.models.ExternalDocumentation;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.License;
+import com.samples.kafka.home.TopicProperties;
+import com.samples.kafka.pageview.PageView;
+import com.samples.kafka.product.ProductCounter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.kstream.KStream;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.config.TopicBuilder;
-import org.springframework.kafka.support.converter.RecordMessageConverter;
-import org.springframework.kafka.support.converter.StringJsonMessageConverter;
 
+import java.util.function.Function;
+
+@Slf4j
 @SpringBootApplication
 @ConfigurationPropertiesScan
 public class KafkaApplication {
@@ -23,7 +25,7 @@ public class KafkaApplication {
   }
 
   @Bean
-  public NewTopic myTopic(TopicProperties topicProperties) {
+  public NewTopic pageViewIn(TopicProperties topicProperties) {
     return TopicBuilder.name(topicProperties.getName())
         .partitions(topicProperties.getNumOfPartitions())
         .replicas(topicProperties.getNumOfReplicas())
@@ -31,22 +33,26 @@ public class KafkaApplication {
   }
 
   @Bean
-  public RecordMessageConverter converter() {
-    return new StringJsonMessageConverter();
+  public NewTopic pageViewOut() {
+    return TopicBuilder.name("categoryCounter").partitions(1).replicas(1).build();
   }
 
+  /**
+   * Kafka stream which will take the input topic defined in application.yaml and produce an
+   * aggregate of count per category into a KTable with Category - Count
+   *
+   * @return new output which is published to the Kafka output destination in the application.yaml.
+   */
   @Bean
-  public OpenAPI kafkaOpenAPI() {
-    return new OpenAPI()
-        .info(
-            new Info()
-                .title("Kafka API")
-                .description("This is a sample API for producing messages into Kafka")
-                .version("1.0")
-                .license(new License().name("The Last Ninja")))
-        .externalDocs(
-            new ExternalDocumentation()
-                .description("Kafka API Documentation")
-                .url("https://github.com/johanglarsson"));
+  public Function<KStream<String, PageView>, KStream<String, ProductCounter>> process() {
+
+    return input ->
+        input
+            .peek((k, v) -> log.info("Received a category {} into Kafka stream", v.getCategoryId()))
+            .groupByKey()
+            .count()
+            .toStream()
+            .peek((k, v) -> log.info("New stream with key {} and counter {} ", k, v))
+            .map((key, value) -> new KeyValue<>(key, new ProductCounter(key, value)));
   }
 }
