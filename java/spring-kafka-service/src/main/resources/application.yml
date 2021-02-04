@@ -29,11 +29,3 @@ spring:
           destination: pageViewTracker
         process-out-0:
           destination: categoryCounter
-topic:
-  name: pageViewTracker
-  num-of-partitions: 1
-  num-of-replicas: 1
-  consumer-type: none
-springdoc:
-  api-docs:
-    enabled: true

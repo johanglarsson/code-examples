@@ -1,6 +1,9 @@
 # Introduction
 
-Sample project for Kafka using Mapstruct as DTO mapper. Also trying Lombok immutability and Jackson.
+Sample project for Kafka using Mapstruct as DTO mapper.
+
+To send messages to the kafka topics just navivate to http://localhost:8080 and click on the links. Each click will
+generate an event into Kafka.
 
 ## Install Kafka on MacOS
 
