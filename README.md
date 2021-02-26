@@ -1,4 +1,4 @@
-# Samples
+# Code Examples
 
 This is my samples project were I put misc stuff which I've tried out. The directories are structured on language and up for grabs.
 
