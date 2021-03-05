@@ -51,33 +51,19 @@ with:
 
 ```Function<KStream<Input,Output>, KStream<Input,Output>> process() {}```
 This will create a stream listener automatically listening to the method name topic, in this case process-in-0 and
-produce it´s result to process-out-0. If we want to override this behaviour do a configuration in application.yml like
-so (See the bindings section where we map it to REAL topics inside Kafka):
+produce result to process-out-0. If we want to override the behaviour do a configuration in application.yml like so (See
+the bindings section where we map it to REAL topics inside Kafka):
 
 ```
 spring:
   cloud:
     stream:
-      kafka:
-        binder:
-          transaction:
-            producer:
-              # This one tells Spring to use it´s own converters. Without it keys are by default ByteArray and n
-              use-native-encoding: false
-      bindings:
-        process-in-0:
-          destination: pageViewTracker
-        process-out-0:
-          destination: categoryCounter
+      function:
+        bindings:
+          # Point to other kafka streams
+          process-in-0: pageViewTrackerTest
+          process-out-0: categoryCounterTest
 ```
 
 The configuration above will tell the stream binding to use pageViewTracker instead of process-in-0 topic. In this way
 you can customize which topic to listen to.
-
-One important thing here is the use-native-encoding on the producer side. We tell Spring to NOT use the Kafka encoding
-scheme (Serde) in it´s base format. We use Spring converters to automatically convert it to the correct datatype.
-Otherwise all keys are by default a ByteArray and not String. If I didn't set it to false then the stream flow did not
-work when calling groupBy since it expected a Byte array and not String.
-
-The bean for this demo purpose has been defined in KafkaApplication class for simplicity. All the regular KafkaListeners
-has also been defined in the same class for simplicity.

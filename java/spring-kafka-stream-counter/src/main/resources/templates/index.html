@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Kafka demo</title>
+    <title>Kafka stream demo</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
           integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous"/>
@@ -13,12 +13,13 @@
         <h1 class="display-4">Kafka sample application</h1>
         <p class="lead">This is a simple application to demo how Kafka can receive events from browser activity.</p>
         <hr class="my-4">
-        <p>In order to issue an event to Kafka just click on the links below</p>
+        <p>In order to issue an event to Kafka just click on the links below and it will post a message to the Kafka
+            brokder</p>
     </div>
     <div class="row">
         <div th:each="product: ${products}">
             <div class="col-sm-6">
-                <div class="card" style="width: 15rem;">
+                <div class="card" style="width: 15rem; border:none;">
                     <img class="card-img-top w-100" th:src="@{'/images/'+${product.imageName}}" alt="Card image cap">
                     <div class="card-body">
                         <h5 class="card-title" th:text="${product.name}"></h5>
